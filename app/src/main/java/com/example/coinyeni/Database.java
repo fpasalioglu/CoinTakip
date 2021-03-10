@@ -79,7 +79,7 @@ public class Database extends SQLiteOpenHelper {
         return coin;
     }
 
-    public  ArrayList<HashMap<String, String>> coinler(){
+    public ArrayList<HashMap<String, String>> coinler(){
         SQLiteDatabase db = this.getReadableDatabase();
         String selectQuery = "SELECT * FROM " + TABLE_NAME;
         Cursor cursor = db.rawQuery(selectQuery, null);

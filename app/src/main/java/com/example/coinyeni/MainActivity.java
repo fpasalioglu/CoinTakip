@@ -5,7 +5,9 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
@@ -25,25 +27,28 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
-    RecyclerView lv;
-    TextView anlikbtc, portfoliobtc, portfolioTl;
-    Database db;
-    ArrayList<HashMap<String, String>> coin_liste = new ArrayList<>();
-    ArrayList<Coin> coinler = new ArrayList<>();
-    CoinListAdapter adapter;
+    private RecyclerView lv;
+    private TextView anlikbtc, portfoliobtc, portfolioTl, zarardurumtext;
+    private Database db;
+    private ArrayList<HashMap<String, String>> coin_liste = new ArrayList<>();
+    private ArrayList<Coin> coinler = new ArrayList<>();
+    private CoinListAdapter adapter;
+    public static SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-
         StrictMode.setThreadPolicy(policy);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         db = new Database(this);
 
+        sharedPref = this.getSharedPreferences("sharedPref", Context.MODE_PRIVATE);
+
         anlikbtc = (TextView)findViewById(R.id.anlikbtc);
         portfoliobtc = (TextView)findViewById(R.id.portBtc);
         portfolioTl = (TextView)findViewById(R.id.portTl);
+        zarardurumtext = (TextView)findViewById(R.id.zarardurumtextview);
 
         lv = (RecyclerView)findViewById(R.id.list_view);
 
@@ -88,16 +93,30 @@ public class MainActivity extends AppCompatActivity {
             lv.setItemAnimator(new DefaultItemAnimator());
             lv.setLayoutManager(new LinearLayoutManager(this));
 
-            float portBtc=0;
+            float savedBTC = sharedPref.getFloat("miktar",0);
+            float savedTL = sharedPref.getFloat("TLmiktar",0);
+            float zarardurum = 0;
+            float portBtc = 0;
             for (int i = 0; i<coinler.size();i++){
-                if (coinler.get(i).getTip().equals("BTC"))
-                    portBtc += coinler.get(i).getKar();
-                else {
+                if (coinler.get(i).getTip().equals("BTC")) {
+                    portBtc += coinler.get(i).getDeger();
+                }else {
                     portBtc += (coinler.get(i).getDeger()/Float.parseFloat(anlikBTC));
                 }
+
+                if (coinler.get(i).getTip().equals("BTC")) {
+                    zarardurum += coinler.get(i).getKar();
+                }else {
+                    zarardurum += (coinler.get(i).getKar()/Float.parseFloat(anlikBTC));
+                }
             }
+
+            float zarartl = zarardurum*Float.parseFloat(anlikBTC);
+            zarardurumtext.setText(zarartl+" TL");
+            portBtc+=savedBTC;
             portfoliobtc.setText(portBtc+" BTC");
             float portTl = portBtc*Float.parseFloat(anlikBTC);
+            portTl+=savedTL;
             portfolioTl.setText(portTl+" TL");
         }
     }
@@ -113,22 +132,16 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.ekle:
-                CoinEkle();
+                startActivity(new Intent(MainActivity.this, CoinEkle.class));
                 return true;
             case R.id.yenile:
                 veriCek();
                 return true;
             case R.id.ayarlar:
-               /* Intent i = new Intent(MainActivity.this, Ayarlar.class);
-                startActivity(i);*/
+                startActivity(new Intent(MainActivity.this, Ayarlar.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    private void CoinEkle() {
-        Intent i = new Intent(MainActivity.this, CoinEkle.class);
-        startActivity(i);
     }
 }
