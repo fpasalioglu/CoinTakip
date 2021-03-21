@@ -4,7 +4,8 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="5dp"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="#f4f4f4">
     <androidx.cardview.widget.CardView
         app:cardCornerRadius="10dp"
         android:layout_margin="10dp"

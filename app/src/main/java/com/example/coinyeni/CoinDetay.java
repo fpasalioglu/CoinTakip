@@ -22,10 +22,10 @@ import java.util.HashMap;
 
 public class CoinDetay extends AppCompatActivity {
     Button b1,b2;
-    TextView t1,t2,t3,t4,t5,hacimView, karzararView, yuzdeView,tlView;
+    TextView t1,t2,t3,t4,t5,hacimView, karzararView, yuzdeView,tlView, enyuksek, endusuk;
     int id;
 
-    TextView tip1,tip2,tip3,tip4,tip5;
+    TextView tip1,tip2,tip3,tip4,tip5,tip6,tip7;
     LinearLayout tllineer;
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,11 +46,16 @@ public class CoinDetay extends AppCompatActivity {
         t4 = (TextView)findViewById(R.id.fiyati);
         t5 = (TextView)findViewById(R.id.degeri);
 
+        endusuk = (TextView)findViewById(R.id.endusuk);
+        enyuksek = (TextView)findViewById(R.id.enyuksek);
+
         tip1 = (TextView)findViewById(R.id.text1);
         tip2 = (TextView)findViewById(R.id.text2);
         tip3 = (TextView)findViewById(R.id.text3);
         tip4 = (TextView)findViewById(R.id.text4);
         tip5 = (TextView)findViewById(R.id.text5);
+        tip6 = (TextView)findViewById(R.id.text22);
+        tip7 = (TextView)findViewById(R.id.text33);
 
         hacimView = (TextView)findViewById(R.id.hacim);
         karzararView = (TextView)findViewById(R.id.karzarar);
@@ -66,8 +71,8 @@ public class CoinDetay extends AppCompatActivity {
         HashMap<String, String> coin = db.coinDetay(id);
 
         t1.setText(coin.get("coin_adi"));
-        t2.setText(coin.get("miktar").toString());
-        t3.setText(coin.get("fiyat").toString());
+        t2.setText(coin.get("miktar"));
+        t3.setText(coin.get("fiyat"));
 
         String tip = coin.get("tip");
         tip1.setText(tip);
@@ -75,12 +80,16 @@ public class CoinDetay extends AppCompatActivity {
         tip3.setText(tip);
         tip4.setText(tip);
         tip5.setText(tip);
+        tip6.setText(tip);
+        tip7.setText(tip);
 
         float maliyet = Float.parseFloat(coin.get("fiyat")) * Float.parseFloat(coin.get("miktar"));
 
         try {
             JSONObject a = Jsonparse.readJsonFromUrl("https://api.binance.com/api/v1/ticker/24hr?symbol="+coin.get("coin_adi")+tip);
             String price = a.getString("lastPrice");
+            String endusukprice = a.getString("lowPrice");
+            String enyuksekprice = a.getString("highPrice");
             float deger = Float.parseFloat(coin.get("miktar")) * Float.parseFloat(price);
             float zarar = deger - maliyet;
 
@@ -88,7 +97,7 @@ public class CoinDetay extends AppCompatActivity {
                 JSONObject b = Jsonparse.readJsonFromUrl("https://api.binance.com/api/v1/ticker/24hr?symbol=BTCTRY");
                 String fiyat = b.getString("lastPrice");
                 float tldeger = zarar * Float.parseFloat(fiyat);
-                tlView.setText(String.format("%.10f", tldeger));
+                tlView.setText(String.format("%.2f", tldeger));
             }else
                 tllineer.setVisibility(View.GONE);
 
@@ -98,8 +107,15 @@ public class CoinDetay extends AppCompatActivity {
             hacimView.setText(a.getString("quoteVolume"));
             t4.setText(price);
 
-            t5.setText(String.format("%.10f", deger));
-            karzararView.setText(String.format("%.10f",zarar));
+            if (tip.equals("TRY")){
+                t5.setText(String.format("%.2f", deger));
+                karzararView.setText(String.format("%.2f",zarar));
+            }else {
+                t5.setText(String.format("%.10f", deger));
+                karzararView.setText(String.format("%.10f",zarar));
+            }
+            endusuk.setText(endusukprice);
+            enyuksek.setText(enyuksekprice);
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
