@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,9 +30,10 @@ public class MainActivity extends AppCompatActivity {
     private TextView anlikbtc, portfoliobtc, portfolioTl, zarardurumtext;
     private Database db;
     private ArrayList<HashMap<String, String>> coin_liste = new ArrayList<>();
-    private ArrayList<Coin> coinler = new ArrayList<>();
+    private final ArrayList<Coin> coinler = new ArrayList<>();
     private CoinListAdapter adapter;
     public static SharedPreferences sharedPref;
+    private String anlikBTC;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,9 +52,14 @@ public class MainActivity extends AppCompatActivity {
 
         lv = (RecyclerView)findViewById(R.id.list_view);
 
-        veriCek();
+        Thread background = new Thread(new Runnable() {
+            public void run() {
+                veriCek();
+            }
+        });
+        background.start();
     }
-    private String anlikBTC;
+
     private void veriCek(){
         coin_liste.clear();
         coinler.clear();
@@ -88,10 +93,6 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(intent);
                 }
             });
-            lv.setHasFixedSize(true);
-            lv.setAdapter(adapter);
-            lv.setItemAnimator(new DefaultItemAnimator());
-            lv.setLayoutManager(new LinearLayoutManager(this));
 
             float savedBTC = sharedPref.getFloat("miktar",0);
             float savedTL = sharedPref.getFloat("TLmiktar",0);
@@ -118,12 +119,22 @@ public class MainActivity extends AppCompatActivity {
             float portTl = portBtc*Float.parseFloat(anlikBTC);
             portTl+=savedTL;
             portfolioTl.setText(portTl+" TL");
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    lv.setHasFixedSize(true);
+                    lv.setAdapter(adapter);
+                    lv.setItemAnimator(new DefaultItemAnimator());
+                    lv.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+                    findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                }
+            });
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
