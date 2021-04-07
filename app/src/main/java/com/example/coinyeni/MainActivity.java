@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            adapter = new CoinListAdapter(coinler, new CustomItemClickListener(){
+            adapter = new CoinListAdapter(this, coinler, new CustomItemClickListener(){
                 @Override
                 public void onItemClick(View v, int position) {
                     Intent intent = new Intent(getApplicationContext(), CoinDetay.class);

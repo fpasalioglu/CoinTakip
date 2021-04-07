@@ -37,7 +37,7 @@
                 android:textColor="@android:color/holo_purple"
                 android:gravity="center"
                 android:layout_marginTop="2dp"
-                android:text="Btc" />
+                android:text="Bekleyiniz..." />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
@@ -67,7 +67,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/holo_purple"
-                android:text="TextView"
+                android:text="Bekleyiniz..."
                 android:gravity="center"/>
 
             <TextView
@@ -75,7 +75,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/holo_purple"
-                android:text="TextView"
+                android:text="Bekleyiniz..."
                 android:gravity="center"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
@@ -107,7 +107,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/holo_purple"
-                android:text="TextView"
+                android:text="Bekleyiniz..."
                 android:gravity="center"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>

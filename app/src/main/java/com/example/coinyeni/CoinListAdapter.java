@@ -1,5 +1,6 @@
 package com.example.coinyeni;
 
+import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,10 +31,11 @@ public class CoinListAdapter extends RecyclerView.Adapter<CoinListAdapter.ViewHo
 
     ArrayList<Coin> coinList;
     CustomItemClickListener listener;
-
-    public CoinListAdapter(ArrayList<Coin> coinList, CustomItemClickListener listener) {
+    Activity activity;
+    public CoinListAdapter(Activity activity, ArrayList<Coin> coinList, CustomItemClickListener listener) {
         this.coinList = coinList;
         this.listener = listener;
+        this.activity = activity;
     }
 
     @Override
@@ -46,6 +48,10 @@ public class CoinListAdapter extends RecyclerView.Adapter<CoinListAdapter.ViewHo
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         holder.title.setText(coinList.get(position).getAd());
         holder.karText.setText(coinList.get(position).getYuzdeKar());
+        if (coinList.get(position).getYuzdeKar().contains("-"))
+            holder.karText.setTextColor(activity.getResources().getColor(R.color.red));
+        else
+            holder.karText.setTextColor(activity.getResources().getColor(R.color.blue));
 
         holder.itemLayout.setOnClickListener(new View.OnClickListener() {
             @Override
