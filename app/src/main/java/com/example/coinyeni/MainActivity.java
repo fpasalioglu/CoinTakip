@@ -16,12 +16,13 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.example.coinyeni.interfaces.CustomItemClickListener;
+import com.example.coinyeni.models.BinanceObje;
 import com.example.coinyeni.models.Coin;
+import com.google.gson.Gson;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private CoinListAdapter adapter;
     public static SharedPreferences sharedPref;
     private String anlikBTC;
+    private BinanceObje[] coinArray;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,28 +62,50 @@ public class MainActivity extends AppCompatActivity {
         background.start();
     }
 
+    private static String readUrl(String urlString) throws Exception {
+        BufferedReader reader = null;
+        try {
+            URL url = new URL(urlString);
+            reader = new BufferedReader(new InputStreamReader(url.openStream()));
+            StringBuffer buffer = new StringBuffer();
+            int read;
+            char[] chars = new char[1024];
+            while ((read = reader.read(chars)) != -1)
+                buffer.append(chars, 0, read);
+
+            return buffer.toString();
+        } finally {
+            if (reader != null)
+                reader.close();
+        }
+    }
+
     private void veriCek(){
         coin_liste.clear();
         coinler.clear();
 
         try {
-            JSONObject a = Jsonparse.readJsonFromUrl("https://api.binance.com/api/v1/ticker/24hr?symbol=BTCTRY");
-            String[] separated = a.getString("lastPrice").split("\\.");
-            anlikBTC = separated[0];
-            anlikbtc.setText(anlikBTC + " TL");
-        }catch (IOException | JSONException e) {
+            String a = readUrl("https://api.binance.com/api/v1/ticker/24hr");
+            Gson gson = new Gson();
+            coinArray = gson.fromJson(a, BinanceObje[].class);
+        }catch (Exception e) {
             e.printStackTrace();
         }
 
         coin_liste = db.coinler();
         if (!coin_liste.isEmpty()){
             for (int i = 0; i<coin_liste.size(); i++){
-                try {
-                    JSONObject a = Jsonparse.readJsonFromUrl("https://api.binance.com/api/v1/ticker/24hr?symbol=" + coin_liste.get(i).get("coin_adi") + coin_liste.get(i).get("tip"));
-                    String price = a.getString("lastPrice");
-                    coinler.add(new Coin(coin_liste.get(i).get("coin_adi"), coin_liste.get(i).get("miktar"), coin_liste.get(i).get("fiyat"), coin_liste.get(i).get("tip"), price));
-                } catch (IOException | JSONException e) {
-                    e.printStackTrace();
+                for (BinanceObje coin : coinArray){
+                    if (coin.getSymbol().equals("BTCTRY")){
+                        String[] separated = coin.getLastPrice().split("\\.");
+                        anlikBTC = separated[0];
+                        anlikbtc.setText(anlikBTC + " TL");
+                    }
+
+                    if (coin.getSymbol().equals(coin_liste.get(i).get("coin_adi") + coin_liste.get(i).get("tip"))){
+                        String price = coin.getLastPrice();
+                        coinler.add(new Coin(coin_liste.get(i).get("coin_adi"), coin_liste.get(i).get("miktar"), coin_liste.get(i).get("fiyat"), coin_liste.get(i).get("tip"), price));
+                    }
                 }
             }
 
