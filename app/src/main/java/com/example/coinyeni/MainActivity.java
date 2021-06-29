@@ -1,5 +1,7 @@
 package com.example.coinyeni;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -13,6 +15,7 @@ import android.os.StrictMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.coinyeni.interfaces.CustomItemClickListener;
@@ -36,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     public static SharedPreferences sharedPref;
     private String anlikBTC;
     private BinanceObje[] coinArray;
+    private LinearLayout coinView, emptyView;
+    ActivityResultLauncher<Intent> intentActivityResultLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +51,9 @@ public class MainActivity extends AppCompatActivity {
         db = new Database(this);
 
         sharedPref = this.getSharedPreferences("sharedPref", Context.MODE_PRIVATE);
+
+        coinView = (LinearLayout)findViewById(R.id.coinView);
+        emptyView = (LinearLayout)findViewById(R.id.emptyView);
 
         anlikbtc = (TextView)findViewById(R.id.anlikbtc);
         portfoliobtc = (TextView)findViewById(R.id.portBtc);
@@ -60,6 +68,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         background.start();
+
+        intentActivityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+                result -> veriCek());
     }
 
     private static String readUrl(String urlString) throws Exception {
@@ -94,6 +106,13 @@ public class MainActivity extends AppCompatActivity {
 
         coin_liste = db.coinler();
         if (!coin_liste.isEmpty()){
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    coinView.setVisibility(View.VISIBLE);
+                    emptyView.setVisibility(View.GONE);
+                }
+            });
             for (int i = 0; i<coin_liste.size(); i++){
                 for (BinanceObje coin : coinArray){
                     if (coin.getSymbol().equals("BTCTRY")){
@@ -154,6 +173,14 @@ public class MainActivity extends AppCompatActivity {
                     findViewById(R.id.loadingPanel).setVisibility(View.GONE);
                 }
             });
+        }else {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    coinView.setVisibility(View.GONE);
+                    emptyView.setVisibility(View.VISIBLE);
+                }
+            });
         }
     }
 
@@ -163,11 +190,16 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    public void openSomeActivityForResult() {
+        Intent intent = new Intent(this, CoinEkle.class);
+        intentActivityResultLauncher.launch(intent);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.ekle:
-                startActivity(new Intent(MainActivity.this, CoinEkle.class));
+                openSomeActivityForResult();
                 return true;
             case R.id.yenile:
                 veriCek();
